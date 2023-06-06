@@ -50,12 +50,14 @@ import { NavbarComponent } from './layout/navbar/navbar.component';
 import { StudentsComponent } from './students/students.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { StudentDetailsComponent } from './students/student-details/student-details.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavbarComponent,
-    StudentsComponent
+    StudentsComponent,
+    StudentDetailsComponent
   ],
   imports: [
     BrowserModule,
