@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
-import { Student } from 'src/app/Models/ui-models/student.model';
+import { Gender } from 'src/app/Models/api-models/gender.model';
+import { Student } from 'src/app/Models/api-models/student.model';
+import { GenderService } from 'src/app/Services/gender.service';
 import { StudentService } from '../student.service';
 
 @Component({
@@ -10,6 +13,7 @@ import { StudentService } from '../student.service';
 })
 export class StudentDetailsComponent implements OnInit {
 
+  genderList : Gender[] = [];
   studentId : string | null | undefined;
   student :Student={
     id: '',
@@ -30,7 +34,10 @@ export class StudentDetailsComponent implements OnInit {
       postalAddress: ''
     },
   }
-  constructor(private readonly studentService :StudentService, private readonly actRouter: ActivatedRoute) { }
+  constructor(private readonly studentService :StudentService,
+     private readonly actRouter: ActivatedRoute,
+     private readonly genderService: GenderService,
+     private snackbar: MatSnackBar) { }
 
   ngOnInit(): void {
     this.actRouter.paramMap.subscribe(
@@ -43,12 +50,35 @@ export class StudentDetailsComponent implements OnInit {
             },
 
           );
+          this.genderService.getAllGenders().subscribe(
+            (successResponse)=>{
+                this.genderList = successResponse;
+            }
+          );
         }
       },
 
     )
 
 
+  }
+
+  onUpdate(): void{
+    this.studentService.updateStudent(this.student.id,this.student).
+    subscribe(
+      (successResponse)=>{
+        this.snackbar.open("Student Updated successfully",undefined,{
+          duration: 2000
+        });
+
+      },
+      (errorResponse)=>{
+        this.snackbar.open("Cannot Update Student",undefined,{
+          duration: 2000
+        });
+      }
+
+    )
   }
 
 }
