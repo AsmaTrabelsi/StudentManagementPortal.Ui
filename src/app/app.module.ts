@@ -46,10 +46,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { NavbarComponent } from './layout/navbar/navbar.component';
+import { StudentsComponent } from './students/students.component';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    NavbarComponent,
+    StudentsComponent
   ],
   imports: [
     BrowserModule,
@@ -91,6 +97,8 @@ import { MatTableModule } from '@angular/material/table';
     MatPaginatorModule,
     MatSortModule,
     MatTableModule,
+    HttpClientModule,
+    FormsModule
   ],
 
   providers: [],
