@@ -1,15 +1,16 @@
 <div class="page-header">
   <div class="container">
-    <h1>View Student</h1>
+    <h1>{{header}}</h1>
   </div>
 </div>
 <div class="container">
   <div class="row top-row">
     <div class="col-xs-12 row end-xs">
-      <a routerLink="students" color="primary" mat-raised-button>
-        <mat-icon>chevron-left</mat-icon>
+      <a routerLink="students" color="accent" mat-raised-button>
+        <mat-icon color>chevron_left</mat-icon>
         Go Back
       </a>
+    </div>
     </div>
     <div class="row">
       <div class="col-xs-6">
@@ -59,7 +60,9 @@
               <mat-form-field appearance="outline">
                 <mat-label>Gender</mat-label>
                 <mat-select [(ngModel)]="student.genderId" name="gender">
-                  <mat-option *ngFor="let gender of genderList" [value]="gender.id">{{gender.description}}</mat-option>
+                  <mat-option *ngFor="let element of genderList" [value]="element.id">{{element.description}}
+
+                  </mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
@@ -82,7 +85,13 @@
           </div>
           <div class="row">
             <div class="col-xs-12">
-              <button mat-raised-button color="primary" (click)="onUpdate()">Save</button>
+              <div class="row between-xs" *ngIf="!isNewStudent">
+                <button mat-raised-button color="primary" (click)="onUpdate()">Save</button>
+                <button mat-raised-button color="warn" (click)="onDelete()">Delete</button>
+              </div>
+              <div class="row between-xs" *ngIf="isNewStudent">
+                <button mat-raised-button color="primary" (click)="onAdd()">Add</button>
+              </div>
             </div>
           </div>
         </form>
@@ -93,4 +102,4 @@
 
     </div>
   </div>
-</div>
+
