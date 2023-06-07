@@ -13,95 +13,98 @@ import { StudentService } from '../student.service';
   styleUrls: ['./student-details.component.css']
 })
 export class StudentDetailsComponent implements OnInit {
+  studentId: string | null | undefined;
+  student: Student = {
+    id: '',
+    firstName: '',
+    lastName: '',
+    dateofBirth: '',
+    email: '',
+    mobile: 0,
+    genderId: '',
+    profileImageUrl: '',
+    gender: {
+      id: '',
+      description: ''
+    },
+    address: {
+      id: '',
+      physicalAddress: '',
+      postalAddress: ''
+    }
+  };
+
+  isNewStudent = false;
+  header = '';
+  displayProfileImageUrl = '';
+
+  genderList: Gender[] = [];
+
   @ViewChild('studentDetailsForm') studentDetailsForm?: NgForm;
 
-  genderList : Gender[] = [];
-  studentId : string | null | undefined;
-  isNewStudent = false;
-  header ='';
-  student :Student={
-    id: '',
-    firstName:'',
-    lastName:'',
-    dateofBirth:'',
-    email:'',
-    mobile:0,
-    genderId:'',
-    profileImageUrl: 'image.jpg',
-    gender:{
-      id:'',
-      description:''
-    },
-    address:{
-      id:'',
-      physicalAddress:'',
-      postalAddress: ''
-    },
-  }
-  constructor(private readonly studentService :StudentService,
-     private readonly actRouter: ActivatedRoute,
-     private readonly genderService: GenderService,
-     private snackbar: MatSnackBar,
-     private router: Router) { }
+  constructor(private readonly studentService: StudentService,
+    private readonly route: ActivatedRoute,
+    private readonly genderService: GenderService,
+    private snackbar: MatSnackBar,
+    private router: Router) { }
+
 
   ngOnInit(): void {
-    this.actRouter.paramMap.subscribe(
-      (params)=>{
-        this.studentId=  params.get('id')
-        if(this.studentId){
+    this.route.paramMap.subscribe(
+      (params) => {
+        this.studentId = params.get('id');
 
-          if(this.studentId.toLowerCase()==='Add'.toLocaleLowerCase()){
-              this.isNewStudent= true;
-              this.header="Add New Student";
-          }else{
-              this.isNewStudent=false;
-              this.header="Update Student";
-              this.studentService.getStudent(this.studentId).subscribe(
-                (successResponse)=>{
-                    this.student = successResponse;
+        if (this.studentId) {
+          if (this.studentId.toLowerCase() === 'Add'.toLowerCase()) {
+            // -> new Student Functionality
+            this.isNewStudent = true;
+            this.header = 'Add New Student';
+            this.setImage();
+          } else {
+            // -> Existing Student Functionality
+            this.isNewStudent = false;
+            this.header = 'Edit Student';
+            this.studentService.getStudent(this.studentId)
+              .subscribe(
+                (successResponse) => {
+                  this.student = successResponse;
+                  this.setImage();
                 },
-
+                (errorResponse) => {
+                  this.setImage();
+                }
               );
-
-
           }
 
-          this.genderService.getAllGenders().subscribe(
-            (successResponse)=>{
-              console.log(successResponse);
+          this.genderService.getAllGenders()
+            .subscribe(
+              (successResponse) => {
                 this.genderList = successResponse;
-            },
-            (errorResponse)=>{
-              console.log(errorResponse);
-            }
-          );
-
-
+              }
+            );
         }
-      },
-
-    )
-
-
-  }
-
-  onUpdate(): void{
-    this.studentService.updateStudent(this.student.id,this.student).
-    subscribe(
-      (successResponse)=>{
-        this.snackbar.open("Student Updated successfully",undefined,{
-          duration: 2000
-        });
-
-      },
-      (errorResponse)=>{
-        this.snackbar.open("Cannot Update Student",undefined,{
-          duration: 2000
-        });
       }
-
-    )
+    );
   }
+
+  onUpdate(): void {
+    if (this.studentDetailsForm?.form.valid) {
+      this.studentService.updateStudent(this.student.id, this.student)
+        .subscribe(
+          (successResponse) => {
+            // Show a notification
+            this.snackbar.open('Student updated successfully', undefined, {
+              duration: 2000
+            });
+          },
+          (errorResponse) => {
+            // Log it
+            console.log(errorResponse);
+          }
+        );
+    }
+  }
+
   onDelete(): void {
     this.studentService.deleteStudent(this.student.id)
       .subscribe(
@@ -115,13 +118,14 @@ export class StudentDetailsComponent implements OnInit {
           }, 2000);
         },
         (errorResponse) => {
-          console.log(errorResponse);
+          // Log
         }
       );
   }
 
   onAdd(): void {
     if (this.studentDetailsForm?.form.valid) {
+      // Submit form date to api
       this.studentService.addStudent(this.student)
         .subscribe(
           (successResponse) => {
@@ -135,10 +139,43 @@ export class StudentDetailsComponent implements OnInit {
 
           },
           (errorResponse) => {
+            // Log
             console.log(errorResponse);
           }
         );
     }
   }
 
+  uploadImage(event: any): void {
+    if (this.studentId) {
+      const file: File = event.target.files[0];
+      this.studentService.uploadImage(this.student.id, file)
+        .subscribe(
+          (successResponse) => {
+            this.student.profileImageUrl = successResponse;
+            this.setImage();
+
+            // Show a notification
+            this.snackbar.open('Profile Image Updated', undefined, {
+              duration: 2000
+            });
+
+          },
+          (errorResponse) => {
+
+          }
+        );
+
+    }
+
+  }
+
+  private setImage(): void {
+    if (this.student.profileImageUrl) {
+      this.displayProfileImageUrl = this.studentService.getImagePath(this.student.profileImageUrl);
+    } else {
+      // Display a default
+      this.displayProfileImageUrl = '/assets/User_icon.png';
+    }
+  }
 }
